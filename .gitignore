@@ -1,0 +1,13 @@
+# Ignore unwanted model files
+src/models/
+
+# Ignore dataset
+data/images/
+
+
+# Ignore Keras model files
+*.keras
+
+
+
+

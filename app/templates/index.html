@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            gap: 50px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 160px;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        input[type="file"] {
+            color: white;
+            background-color: #1f1f1f;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 5px;
+            width: 160px;
+        }
+
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #video, #preview {
+            border-radius: 12px;
+            width: 400px;
+            height: 300px;
+            object-fit: contain;
+            background-color: black;
+            display: none;
+        }
+
+        /* النص يكون أسفل الصورة مش فوقها */
+        #emotion {
+            margin-top: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 18px;
+            width: fit-content;
+        }
+
+        h1 {
+            margin-bottom: 15px;
+            color: #3b82f6;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Controls -->
+        <div class="controls">
+            <h2>🎛 Controls</h2>
+            <input type="file" id="uploadInput">
+            <button onclick="uploadImage()">Predict from Image</button>
+            <button onclick="startCamera()">Start Camera</button>
+            <button onclick="stopCamera()">Stop Camera</button>
+        </div>
+
+        <!-- Video/Image Preview -->
+        <div class="video-container">
+            <h1>😊 Emotion Detection App</h1>
+            <video id="video" autoplay></video>
+            <img id="preview">
+            <div id="emotion"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const preview = document.getElementById('preview');
+        const emotionDiv = document.getElementById('emotion');
+        let stream, interval;
+
+        // ---- Upload Image ----
+        async function uploadImage() {
+            const fileInput = document.getElementById('uploadInput');
+            if (!fileInput.files.length) return alert("Please choose an image");
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const res = await fetch("/predict_image/", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            preview.src = data.image;
+            preview.style.display = "block";
+            video.style.display = "none";
+
+            const emotionsText = data.results.map(r => `${r.emotion} (${(r.confidence*100).toFixed(1)}%)`).join(", ");
+            emotionDiv.innerText = `Detected: ${emotionsText}`;
+        }
+
+        // ---- Real-Time Camera ----
+        async function startCamera() {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            video.style.display = "block";
+            preview.style.display = "none";
+            emotionDiv.innerText = "";
+
+            interval = setInterval(async () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                const imageData = canvas.toDataURL('image/jpeg');
+
+                const res = await fetch("/predict_camera/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const data = await res.json();
+
+                preview.src = data.image;
+                preview.style.display = "block";
+                video.style.display = "none";
+
+                const emotionsText = data.results.map(r => `${r.emotion} (${(r.confidence*100).toFixed(1)}%)`).join(", ");
+                emotionDiv.innerText = `Detected: ${emotionsText}`;
+            }, 1000);
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                clearInterval(interval);
+                video.style.display = "none";
+                preview.style.display = "none";
+                emotionDiv.innerText = "";
+            }
+        }
+    </script>
+</body>
+</html>
