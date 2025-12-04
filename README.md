@@ -1,4 +1,9 @@
 # Emotion Detection
+<img width="947" height="386" alt="Image" src="https://github.com/user-attachments/assets/e2e12f4e-cf52-419e-8d3c-2a64f0515890" />
+
+app_link : https://huggingface.co/spaces/emann123/emotion-detection-fastapi
+
+presentation : https://www.canva.com/design/DAG6Y1obRVA/MZ4ubOQB5mMXpLd2kAitPQ/edit?utm_content=DAG6Y1obRVA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ## Overview
 
@@ -96,12 +101,5 @@ jupyter notebook
 * **ResNet Accuracy:** 70%
 * Confusion matrix highlights which emotions were predicted more accurately.
 
----
-
-## Future Improvements
-
-* Add **multi-face detection** in real-time video.
-* Deploy as a **web application** with live webcam emotion detection.
-* Implement **emotion trend analysis** over time.
 
 
