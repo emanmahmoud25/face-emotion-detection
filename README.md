@@ -93,13 +93,7 @@ jupyter notebook
 
 * Explore training, evaluation, and visualizations interactively.
 
----
 
-## Results
-
-* **MobileNet Accuracy:** 68.5%
-* **ResNet Accuracy:** 70%
-* Confusion matrix highlights which emotions were predicted more accurately.
 
 
 
